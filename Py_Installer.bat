@@ -1,0 +1,1 @@
+"C:\Python27\Scripts\pyinstaller.exe" --onefile word2pdf.py
