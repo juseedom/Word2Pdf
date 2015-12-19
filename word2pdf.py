@@ -19,7 +19,7 @@ def word2pdf(filedoc):
 if __name__ == '__main__':
     for filetuple in os.walk('.\\'):
         for datefile in filetuple[2]:
-            if datefile.endswidth('.doc'):
+            if datefile.endswith('.doc'):
                 word2pdf(str(os.getcwd())+'\\'+datefile)
-            elif datefile.endswidth('.docx'):
+            elif datefile.endswith('.docx'):
                 word2pdf(str(os.getcwd())+'\\'+datefile)
