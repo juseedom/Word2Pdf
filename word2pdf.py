@@ -1,25 +1,41 @@
+from pathlib import Path
+
 import win32com.client as win32
-import os, sys
 
 def word2pdf(filedoc):
-    print(filedoc)
+    """ convert the word *.doc, *.docx to *.pdf (save to same location)
+    Args:
+        filedoc (str): the file path for doc files
+    """
     try:
-        word = win32.gencache.EnsureDispatch('Word.Application')
-        word.Visible = 0
-        test = word.Documents.Open(filedoc)
-        if filedoc.endswith('.doc'):
-            test.ExportAsFixedFormat(filedoc[:-3]+'pdf',17)
-        elif filedoc.endswith('.docx'):
-            test.ExportAsFixedFormat(filedoc[:-4]+'pdf',17)
-        test.Close()
-        word.Quit()
-    except:
-        print('open failed')
+        word = None
+        doc = None
+        if Path(filedoc).suffix in ['.doc', '.docx']:
+            output = Path(filedoc).with_suffix('.pdf')
+            if output.exists():
+                return
+            print("Convert WORD into PDF: "+filedoc)
+            word = win32.DispatchEx('Word.Application')
+            word.Visible = 0
+            doc = word.Documents.Open(filedoc, False, False, True)
+            # 'OutputFileName', 'ExportFormat', 'OpenAfterExport', 'OptimizeFor', 'Range',
+            # 'From', 'To', 'Item', 'IncludeDocProps', 'KeepIRM', 'CreateBookmarks', 'DocStructureTags',
+            # 'BitmapMissingFonts', 'UseISO19005_1', 'FixedFormatExtClassPtr'
+            doc.ExportAsFixedFormat(
+                str(output),
+                ExportFormat=17,
+                OpenAfterExport=False,
+                OptimizeFor=0,
+                CreateBookmarks=1)
+    except Exception as e:
+        print('open failed due to \n' + str(e))
+    finally:
+        if doc:
+            doc.Close()
+        if word:
+            word.Quit()
     
 if __name__ == '__main__':
-    for filetuple in os.walk('.\\'):
-        for datefile in filetuple[2]:
-            if datefile.endswith('.doc'):
-                word2pdf(str(os.getcwd())+'\\'+datefile)
-            elif datefile.endswith('.docx'):
-                word2pdf(str(os.getcwd())+'\\'+datefile)
+    base_dir = '.'
+    for doc_file in Path(base_dir).glob('*.doc?'):
+        word2pdf(str(doc_file))
